@@ -8,6 +8,8 @@
 #ifndef CLOCKCONFIG_H_
 #define CLOCKCONFIG_H_
 
+#include "stm32f4xx.h"
+
 namespace custom_libraries {
 
 class clock_config {
