@@ -6,7 +6,7 @@
  */
 
 #include "clockconfig.h"
-#include "stm32f4xx.h"
+
 
 namespace custom_libraries {
 
