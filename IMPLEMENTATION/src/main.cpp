@@ -17,8 +17,12 @@ custom_libraries::clock_config system_clock;
 
 int data = 0;
 
-extern "C" void USART3_IRQHnadler(void){
-	data++;
+extern "C" void USART3_IRQHandler(void){
+	if(USART3->SR & USART_SR_RXNE){
+		USART3->SR &= ~USART_SR_RXNE;
+		data++;
+	}
+
 }
 
 
@@ -58,23 +62,19 @@ int main(void)
     USART3->CR1 |= USART_CR1_TE;
 	USART3->CR1 |= USART_CR1_RE;
 	USART3->CR1 |= USART_CR1_UE;
-	USART3->CR2 |= USART_CR1_RXNEIE;
+	USART3->CR1 |= USART_CR1_RXNEIE;
+
 
 	//Set the UART baudrate(9600)
 	USART3->BRR = ( ( ( baud / 16 ) << 4) |
             ( ( (baud % 16 )<< 0) ) );
 
-	NVIC_SetPriority(USART3_IRQn,0x00);
+	NVIC_SetPriority(USART3_IRQn,0x03);
 	NVIC_EnableIRQ(USART3_IRQn);
 
 	USART3->DR ='U';
 
 	while(1){
-
-		if(USART3->SR & USART_SR_RXNE){
-			USART3->SR &= ~USART_SR_RXNE;
-			data++;
-		}
 
 	}
 }
