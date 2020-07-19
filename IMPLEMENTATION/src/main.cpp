@@ -15,55 +15,24 @@
 
 custom_libraries::clock_config system_clock;
 
-#define BUFFER_SIZE 512
-char receive_buffer[BUFFER_SIZE];
-int buffer_position = 0;
 int data = 0;
 
-char receive_char(){
-	char byte;
-	byte = USART3->DR;
-	return byte;
-}
-
-void receive_string(){
-	for(int i = 0; i < BUFFER_SIZE; i++,buffer_position++){
-		receive_buffer[buffer_position] = receive_char();
-		if(buffer_position >= BUFFER_SIZE) buffer_position = 0;
-	}
-}
-
-void flush_buffer(){
-	for(int i = 0; i < BUFFER_SIZE; i++) {
-		receive_buffer[i] = 0x00;
-	}
-	buffer_position = 0;
-}
-
-void send_char(char byte){
-	while(!(USART3->SR & USART_SR_TXE)){}
-	USART3->DR = byte;
-}
-
-void send_string(char *byte){
-	for(;*byte;byte++){
-		send_char(*byte);
-	}
-}
-
-extern "C" void USART3_IRQHandler(){
+extern "C" void USART3_IRQHnadler(void){
 	data++;
 }
+
 
 int main(void)
 {
 
 	system_clock.initialize();
+
 	//Enable USART RCC (USART3)
 	RCC->APB1ENR |= RCC_APB1ENR_USART3EN;
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
 
 	//Set USART3 pins to Alternate Function Mode
+	//TX pin setup
 	GPIOB->MODER |= GPIO_MODER_MODER10_1;
 	GPIOB->OSPEEDR |= GPIO_OSPEEDER_OSPEEDR10;
 	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR10_0;
@@ -72,6 +41,15 @@ int main(void)
 	GPIOB->AFR[1] |= (1<<8);
 	GPIOB->AFR[1] |= (1<<9);
 	GPIOB->AFR[1] |= (1<<10);
+
+	//RX pin setup
+	GPIOB->MODER |= GPIO_MODER_MODER11_1;
+	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR11_0;
+
+	GPIOB->AFR[1] |= (1<<12);
+	GPIOB->AFR[1] |= (1<<13);
+	GPIOB->AFR[1] |= (1<<14);
+
 
 
 	uint16_t baud = (42000000/(9600));
@@ -89,17 +67,14 @@ int main(void)
 	NVIC_SetPriority(USART3_IRQn,0x00);
 	NVIC_EnableIRQ(USART3_IRQn);
 
-
-	char name[] = "JACK MCLEANS";
-	send_string(name);
-
+	USART3->DR ='U';
 
 	while(1){
-		/*
-		if(strncmp(receive_buffer,name,sizeof(name)/sizeof(char) -1) == 0){
-			flush_buffer();
-			send_string("GOT IT");
-			send_char('\n');
-		}*/
+
+		if(USART3->SR & USART_SR_RXNE){
+			USART3->SR &= ~USART_SR_RXNE;
+			data++;
+		}
+
 	}
 }
