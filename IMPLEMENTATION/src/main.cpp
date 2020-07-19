@@ -17,13 +17,11 @@ custom_libraries::clock_config system_clock;
 
 int data = 0;
 
-extern "C" void USART3_IRQHandler(void){
-	if(USART3->SR & USART_SR_RXNE){
-		USART3->SR &= ~USART_SR_RXNE;
-		data++;
-	}
+#define BUFFER_SIZE 512
+char receive_buffer[BUFFER_SIZE];
+int buffer_position;
 
-}
+
 
 void print_char(char byte){
 	while(!(USART3->SR & USART_SR_TXE)){}
@@ -39,6 +37,32 @@ void println(char *byte){
 	print_char('\n');
 }
 
+char read_char(){
+	char byte;
+	byte = USART3->DR;
+	return byte;
+}
+
+void read_string(){
+	receive_buffer[buffer_position] = USART3->DR;
+	buffer_position++;
+
+	if(buffer_position >= BUFFER_SIZE) buffer_position = 0;
+
+}
+
+void flush_buffer(){
+	for(int i = 0; i < BUFFER_SIZE; i++) receive_buffer[i] = 0x00;
+	buffer_position = 0;
+}
+
+extern "C" void USART3_IRQHandler(void){
+	if(USART3->SR & USART_SR_RXNE){
+		USART3->SR &= ~USART_SR_RXNE;
+		read_string();
+	}
+
+}
 
 
 int main(void)
@@ -87,9 +111,15 @@ int main(void)
 	NVIC_SetPriority(USART3_IRQn,0x03);
 	NVIC_EnableIRQ(USART3_IRQn);
 
+	char name[] = "MCLEANS";
 
 
 	while(1){
+
+		if(strncmp(receive_buffer,name,(sizeof(name)/sizeof(char))-1) == 0){
+			println("JACK");
+			flush_buffer();
+		}
 
 	}
 }
