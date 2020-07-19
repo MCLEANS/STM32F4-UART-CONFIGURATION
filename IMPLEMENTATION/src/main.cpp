@@ -25,6 +25,21 @@ extern "C" void USART3_IRQHandler(void){
 
 }
 
+void print_char(char byte){
+	while(!(USART3->SR & USART_SR_TXE)){}
+	USART3->DR = byte;
+}
+
+void print(char *byte){
+	for(;*byte;byte++) print_char(*byte);
+}
+
+void println(char *byte){
+	for(;*byte;byte++) print_char(*byte);
+	print_char('\n');
+}
+
+
 
 int main(void)
 {
@@ -72,7 +87,7 @@ int main(void)
 	NVIC_SetPriority(USART3_IRQn,0x03);
 	NVIC_EnableIRQ(USART3_IRQn);
 
-	USART3->DR ='U';
+
 
 	while(1){
 
