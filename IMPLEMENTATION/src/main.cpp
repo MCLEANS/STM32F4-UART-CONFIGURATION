@@ -12,8 +12,12 @@
 #include "stm32f4xx.h"
 #include "clockconfig.h"
 #include <string.h>
+#include "USART.h"
 
 custom_libraries::clock_config system_clock;
+custom_libraries::USART serial(USART3,GPIOB,11,10,9600);
+
+/*
 
 int data = 0;
 
@@ -56,10 +60,12 @@ void flush_buffer(){
 	buffer_position = 0;
 }
 
+*/
+
 extern "C" void USART3_IRQHandler(void){
 	if(USART3->SR & USART_SR_RXNE){
 		USART3->SR &= ~USART_SR_RXNE;
-		read_string();
+
 	}
 
 }
@@ -69,6 +75,8 @@ int main(void)
 {
 
 	system_clock.initialize();
+
+	/*
 
 	//Enable USART RCC (USART3)
 	RCC->APB1ENR |= RCC_APB1ENR_USART3EN;
@@ -107,19 +115,23 @@ int main(void)
 	//Set the UART baudrate(9600)
 	USART3->BRR = ( ( ( baud / 16 ) << 4) |
             ( ( (baud % 16 )<< 0) ) );
+    */
+
 
 	NVIC_SetPriority(USART3_IRQn,0x03);
 	NVIC_EnableIRQ(USART3_IRQn);
 
 	char name[] = "MCLEANS";
-
+	serial.println(name);
 
 	while(1){
-
+/*
 		if(strncmp(receive_buffer,name,(sizeof(name)/sizeof(char))-1) == 0){
 			println("JACK");
 			flush_buffer();
 		}
+
+*/
 
 	}
 }

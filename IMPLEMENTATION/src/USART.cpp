@@ -93,9 +93,40 @@ USART::USART(USART_TypeDef *_USART,
 	}
 
 
-
-
 }
+
+char USART::read_char(){
+	char byte;
+	byte = _USART->DR;
+	return byte;
+}
+
+void USART::read_string(){
+	receive_buffer[buffer_position] = _USART->DR;
+	buffer_position++;
+
+	if(buffer_position >= BUFFER_SIZE) buffer_position = 0;
+}
+
+void USART::flush_buffer(){
+	for(int i = 0; i < BUFFER_SIZE; i++) receive_buffer[i] = 0x00;
+	buffer_position = 0;
+}
+
+void USART::print_char(char byte){
+	while(!(_USART->SR & USART_SR_TXE)){}
+	_USART->DR = byte;
+}
+
+void USART::print(char *byte){
+	for(;*byte;byte++) print_char(*byte);
+}
+
+void USART::println(char *byte){
+	for(;*byte;byte++) print_char(*byte);
+	print_char('\n');
+}
+
 
 USART::~USART() {
 	// TODO Auto-generated destructor stub

@@ -11,6 +11,7 @@
 #include "stm32f4xx.h"
 #define CLOCK_FREQ_APB1 42000000UL
 #define CLOCK_FREQ_APB2 84000000UL
+#define BUFFER_SIZE 1024
 
 namespace custom_libraries {
 
@@ -21,10 +22,12 @@ private:
 	uint8_t RX_PIN;
 	uint8_t TX_PIN;
 	int baudrate;
+	int buffer_position = 0;
 private:
 	char read_char();
 	void print_char(char byte);
 public:
+	char receive_buffer[BUFFER_SIZE];
 public:
 	USART(USART_TypeDef *_USART,GPIO_TypeDef *GPIO,uint8_t RX_PIN,uint8_t TX_PIN,int baudrate);
 	~USART();
