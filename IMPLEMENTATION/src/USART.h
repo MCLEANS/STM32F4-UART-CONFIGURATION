@@ -31,6 +31,7 @@ public:
 public:
 	USART(USART_TypeDef *_USART,GPIO_TypeDef *GPIO,uint8_t RX_PIN,uint8_t TX_PIN,int baudrate);
 	~USART();
+	void initialize();
 	void print(char *byte);
 	void println(char *byte);
 	void read_string();

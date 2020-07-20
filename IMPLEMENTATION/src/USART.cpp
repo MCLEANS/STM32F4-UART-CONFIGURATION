@@ -18,6 +18,12 @@ USART::USART(USART_TypeDef *_USART,
 								RX_PIN(RX_PIN),
 								TX_PIN(TX_PIN),
 								baudrate(baudrate){
+
+
+
+}
+
+void USART::initialize(){
 	//ENABLE USART RCC
 	if(_USART == USART1) RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
 	if(_USART == USART6) RCC->APB2ENR |= RCC_APB2ENR_USART6EN;
@@ -92,7 +98,11 @@ USART::USART(USART_TypeDef *_USART,
 					( ( (usart_div_value % 16 )<< 0) ) );
 	}
 
-
+	//Enable RX, TX and UART
+    _USART->CR1 |= USART_CR1_TE;
+	_USART->CR1 |= USART_CR1_RE;
+	_USART->CR1 |= USART_CR1_UE;
+	_USART->CR1 |= USART_CR1_RXNEIE;
 }
 
 char USART::read_char(){
